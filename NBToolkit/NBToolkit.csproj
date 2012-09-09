@@ -54,7 +54,7 @@
     </DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Substrate, Version=0.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Substrate, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>Assemblies\Substrate.dll</HintPath>
     </Reference>

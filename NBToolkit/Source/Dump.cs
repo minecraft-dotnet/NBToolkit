@@ -97,7 +97,7 @@ namespace NBToolkit
 
         public override void Run ()
         {
-            NbtWorld world = GetWorld(opt);
+            NbtWorld world = NbtWorld.Open(opt.OPT_WORLD);
             IChunkManager cm = world.GetChunkManager(opt.OPT_DIM);
             FilteredChunkManager fcm = new FilteredChunkManager(cm, opt.GetChunkFilter());
 
@@ -118,25 +118,34 @@ namespace NBToolkit
                     fstr.Write(",");
                 }
 
-                Chunk c = chunk.GetChunkRef();
+                IChunk c = chunk.GetChunkRef();
+
+                NbtTree tree = null;
+                if (c is AnvilChunk)
+                    tree = (c as AnvilChunk).Tree;
+                else if (c is AlphaChunk)
+                    tree = (c as AlphaChunk).Tree;
+
+                if (tree == null || tree.Root == null)
+                    continue;
 
                 if (!opt._dumpBlocks) {
-                    c.Tree.Root["Level"].ToTagCompound().Remove("Blocks");
-                    c.Tree.Root["Level"].ToTagCompound().Remove("Data");
-                    c.Tree.Root["Level"].ToTagCompound().Remove("BlockLight");
-                    c.Tree.Root["Level"].ToTagCompound().Remove("SkyLight");
-                    c.Tree.Root["Level"].ToTagCompound().Remove("HeightMap");
+                    tree.Root["Level"].ToTagCompound().Remove("Blocks");
+                    tree.Root["Level"].ToTagCompound().Remove("Data");
+                    tree.Root["Level"].ToTagCompound().Remove("BlockLight");
+                    tree.Root["Level"].ToTagCompound().Remove("SkyLight");
+                    tree.Root["Level"].ToTagCompound().Remove("HeightMap");
                 }
 
                 if (!opt._dumpEntities) {
-                    c.Tree.Root["Level"].ToTagCompound().Remove("Entities");
+                    tree.Root["Level"].ToTagCompound().Remove("Entities");
                 }
 
                 if (!opt._dumpTileEntities) {
-                    c.Tree.Root["Level"].ToTagCompound().Remove("TileEntities");
+                    tree.Root["Level"].ToTagCompound().Remove("TileEntities");
                 }
 
-                string s = JSONSerializer.Serialize(c.Tree.Root["Level"], 1);
+                string s = JSONSerializer.Serialize(tree.Root["Level"], 1);
                 fstr.Write(s);
 
                 first = false;

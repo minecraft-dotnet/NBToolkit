@@ -182,7 +182,7 @@ namespace NBToolkit
 
         public override void Run ()
         {
-            NbtWorld world = GetWorld(opt);
+            NbtWorld world = NbtWorld.Open(opt.OPT_WORLD);
             IChunkManager cm = world.GetChunkManager(opt.OPT_DIM);
             FilteredChunkManager fcm = new FilteredChunkManager(cm, opt.GetChunkFilter());
 
@@ -258,6 +258,23 @@ namespace NBToolkit
             : base(bm)
         {
             opt = o;
+
+            IChunk c = null;
+
+            if (bm is AlphaChunkManager)
+                c = AlphaChunk.Create(0, 0);
+            else
+                c = AnvilChunk.Create(0, 0);
+
+            chunkXDim = c.Blocks.XDim;
+            chunkYDim = c.Blocks.YDim;
+            chunkZDim = c.Blocks.ZDim;
+            chunkXMask = chunkXDim - 1;
+            chunkYMask = chunkYDim - 1;
+            chunkZMask = chunkZDim - 1;
+            chunkXLog = Log2(chunkXDim);
+            chunkYLog = Log2(chunkYDim);
+            chunkZLog = Log2(chunkZDim);
         }
 
         protected override bool Check (int x, int y, int z)

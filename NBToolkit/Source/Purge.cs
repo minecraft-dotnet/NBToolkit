@@ -70,7 +70,7 @@ namespace NBToolkit
 
         public override void Run ()
         {
-            NbtWorld world = GetWorld(opt);
+            NbtWorld world = NbtWorld.Open(opt.OPT_WORLD);
             IChunkManager cm = world.GetChunkManager(opt.OPT_DIM);
             FilteredChunkManager fcm = new FilteredChunkManager(cm, opt.GetChunkFilter());
 

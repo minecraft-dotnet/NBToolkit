@@ -190,7 +190,7 @@ namespace NBToolkit
             return _cm.ChunkLocalZ(cz);
         }
 
-        public Chunk GetChunk (int cx, int cz)
+        public IChunk GetChunk (int cx, int cz)
         {
             return _cm.GetChunk(cx, cz);
         }
@@ -220,12 +220,12 @@ namespace NBToolkit
             return _cm.Save();
         }
 
-        public bool SaveChunk (Chunk chunk)
+        public bool SaveChunk (IChunk chunk)
         {
             return _cm.SaveChunk(chunk);
         }
 
-        public ChunkRef SetChunk (int cx, int cz, Chunk chunk)
+        public ChunkRef SetChunk (int cx, int cz, IChunk chunk)
         {
             return _cm.SetChunk(cx, cz, chunk);
         }
