@@ -75,12 +75,12 @@ namespace NBToolkit
                 { "nbxa=", "Update blocks that have block type {ID} as their south neighbor",
                     v => OPT_NEIGHBOR_S = Convert.ToInt32(v) % 256 },
                 { "nbxb=", "Update blocks that have block type {ID} as their north neighbor",
-                    v => OPT_NEIGHBOR_N = Convert.ToInt32(v) % 256 },
-                { "nbya=", "Update blocks that have block type {ID} as their top neighbor",
-                    v => OPT_NEIGHBOR_T = Convert.ToInt32(v) % 256 },
-                { "nbyb=", "Update blocks that have block type {ID} as their bottom neighbor",
-                    v => OPT_NEIGHBOR_B = Convert.ToInt32(v) % 256 },
-                { "nbza=", "Update blocks that have block type {ID} as their west neighbor",
+                    v => OPT_NEIGHBOR_N = Convert.ToInt32(v) % 256 },*/
+                /*{ "nbya|BlockAboveEq=", "Update blocks that have block type {ID} as their top neighbor.  This option is repeatable.",
+                    v => BlocksAboveEq.Add(Convert.ToInt32(v) % 256) },
+                { "nbyb|BlockBelowEq=", "Update blocks that have block type {ID} as their bottom neighbor.  This option is repeatable.",
+                    v => BlocksBelowEq.Add(Convert.ToInt32(v) % 256) },*/
+                /*{ "nbza=", "Update blocks that have block type {ID} as their west neighbor",
                     v => OPT_NEIGHBOR_W = Convert.ToInt32(v) % 256 },
                 { "nbzb=", "Update blocks that have block type {ID} as their east neighbor",
                     v => OPT_NEIGHBOR_E = Convert.ToInt32(v) % 256 },*/
@@ -206,6 +206,9 @@ namespace NBToolkit
         {
             IBlockFilter opt_b = opt.GetBlockFilter();
 
+            //chunk.Blocks.AutoLight = false;
+            //chunk.Blocks.AutoTileTick = false;
+
             int xBase = chunk.X * chunk.Blocks.XDim;
             int zBase = chunk.Z * chunk.Blocks.ZDim;
 
@@ -289,6 +292,25 @@ namespace NBToolkit
                 }
 
                 foreach (BlockKey key in _sort[i]) {
+                    // Probability test
+                    if (opt_b.ProbMatch != null) {
+                        double c = rand.NextDouble();
+                        if (c > opt_b.ProbMatch)
+                            continue;
+                    }
+
+                    if (opt_b.BlocksAboveCount > 0 && key.y < ydim - 1) {
+                        int neighborId = chunk.Blocks.GetID(key.x, key.y + 1, key.z);
+                        if (!opt_b.BlocksAboveContains(neighborId))
+                            continue;
+                    }
+
+                    if (opt_b.BlocksBelowCount > 0 && key.y > 0) {
+                        int neighborId = chunk.Blocks.GetID(key.x, key.y - 1, key.z);
+                        if (!opt_b.BlocksBelowContains(neighborId))
+                            continue;
+                    }
+
                     chunk.Blocks.SetID(key.x, key.y, key.z, (int)opt.OPT_AFTER);
 
                     if (opt.OPT_VV) {

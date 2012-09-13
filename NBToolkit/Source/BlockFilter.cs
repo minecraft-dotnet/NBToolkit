@@ -31,6 +31,15 @@ namespace NBToolkit
 
         bool IncludedBlocksContains (int id);
         bool ExcludedBlocksContains (int id);
+
+        IEnumerable<int> BlocksAboveEq { get; } // MatchAny
+        IEnumerable<int> BlocksBelowEq { get; } // MatchAny
+
+        int BlocksAboveCount { get; }
+        int BlocksBelowCount { get; }
+
+        bool BlocksAboveContains (int id);
+        bool BlocksBelowContains (int id);
     }
 
     public class BlockFilter : IOptions, IBlockFilter
@@ -48,6 +57,9 @@ namespace NBToolkit
         protected List<int> _excludedBlocks = new List<int>();
 
         protected double? _prob = null;
+
+        protected List<int> _blocksAboveEq = new List<int>();
+        protected List<int> _blocksBelowEq = new List<int>();
 
         protected OptionSet _options;
 
@@ -131,7 +143,7 @@ namespace NBToolkit
                         try { _zAboveEq = Convert.ToInt32(v1); } catch (FormatException) { }
                         try { _zBelowEq = Convert.ToInt32(v2); } catch (FormatException) { } 
                     } },
-                { "brv|BlockInvertXYZ", "Inverts the block selection created by --cxr, --cyr and --czr when all three options are used.",
+                { "brv|BlockInvertXYZ", "Inverts the block selection created by --bxr, --byr and --bzr when all three options are used.",
                     v => _invertXYZ = true },
                 { "bi|BlockInclude=", "Match blocks of type {ID}.  This option is repeatable.",
                     v => _includedBlocks.Add(Convert.ToInt32(v) % 256) },
@@ -153,6 +165,10 @@ namespace NBToolkit
                             _excludedBlocks.Add(i);
                         }
                     } },
+                { "nbya|BlockAboveEq=", "Update blocks that have block type {ID} as their top neighbor.  This option is repeatable.",
+                    v => _blocksAboveEq.Add(Convert.ToInt32(v) % 256) },
+                { "nbyb|BlockBelowEq=", "Update blocks that have block type {ID} as their bottom neighbor.  This option is repeatable.",
+                    v => _blocksBelowEq.Add(Convert.ToInt32(v) % 256) },
                 { "bp|BlockProbability=", "Selects a matching block with probability {VAL} (0.0-1.0)",
                     v => _prob = Convert.ToDouble(v) },
             };
@@ -183,6 +199,36 @@ namespace NBToolkit
         public bool ExcludedBlocksContains (int id)
         {
             return _excludedBlocks.Contains(id);
+        }
+
+        public IEnumerable<int> BlocksAboveEq
+        {
+            get { return _blocksAboveEq; }
+        }
+
+        public IEnumerable<int> BlocksBelowEq
+        {
+            get { return _blocksBelowEq; }
+        }
+
+        public int BlocksAboveCount
+        {
+            get { return _blocksAboveEq.Count; }
+        }
+
+        public int BlocksBelowCount
+        {
+            get { return _blocksBelowEq.Count; }
+        }
+
+        public bool BlocksAboveContains (int id)
+        {
+            return _blocksAboveEq.Contains(id);
+        }
+
+        public bool BlocksBelowContains (int id)
+        {
+            return _blocksBelowEq.Contains(id);
         }
     }
 }

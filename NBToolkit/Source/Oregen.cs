@@ -11,6 +11,7 @@ namespace NBToolkit
     {
         private OptionSet _filterOpt = null;
         private ChunkFilter _chunkFilter = null;
+        private BlockFilter _blockFilter = null;  
 
         public int? OPT_ID = null;
 
@@ -78,6 +79,7 @@ namespace NBToolkit
             };
 
             _chunkFilter = new ChunkFilter();
+            _blockFilter = new BlockFilter();
         }
 
         public OregenOptions (string[] args)
@@ -92,6 +94,7 @@ namespace NBToolkit
 
             _filterOpt.Parse(args);
             _chunkFilter.Parse(args);
+            _blockFilter.Parse(args);
         }
 
         public override void PrintUsage ()
@@ -104,6 +107,9 @@ namespace NBToolkit
 
             Console.WriteLine();
             _chunkFilter.PrintUsage();
+
+            Console.WriteLine();
+            _blockFilter.PrintUsage();
 
             Console.WriteLine();
             base.PrintUsage();
@@ -166,6 +172,11 @@ namespace NBToolkit
         public IChunkFilter GetChunkFilter ()
         {
             return _chunkFilter;
+        }
+
+        public IBlockFilter GetBlockFilter ()
+        {
+            return _blockFilter;
         }
     }
 
@@ -254,6 +265,8 @@ namespace NBToolkit
 
         protected OregenOptions opt;
 
+        private static Random rand = new Random();
+
         public GenOreBlockManager (IChunkManager bm, OregenOptions o)
             : base(bm)
         {
@@ -285,6 +298,9 @@ namespace NBToolkit
 
             int blockID = cache.Blocks.GetID(x & chunkXMask, y & chunkYMask, z & chunkZMask);
 
+            if (!CheckBlockFilter(x, y, z, blockID))
+                return false;
+
             if (
                 ((opt.OPT_OA) && (blockID != opt.OPT_ID)) ||
                 ((opt.OPT_OO) && (
@@ -312,5 +328,58 @@ namespace NBToolkit
             return false;
         }
 
+        private bool CheckBlockFilter (int x, int y, int z, int blockId)
+        {
+            IBlockFilter opt_b = opt.GetBlockFilter();
+
+            if (!opt_b.InvertXYZ) {
+                if (opt_b.XAboveEq != null && x < opt_b.XAboveEq)
+                    return false;
+                if (opt_b.XBelowEq != null && x > opt_b.XBelowEq)
+                    return false;
+                if (opt_b.YAboveEq != null && y < opt_b.YAboveEq)
+                    return false;
+                if (opt_b.YBelowEq != null && y > opt_b.YBelowEq)
+                    return false;
+                if (opt_b.ZAboveEq != null && z < opt_b.ZAboveEq)
+                    return false;
+                if (opt_b.ZBelowEq != null && z > opt_b.ZBelowEq)
+                    return false;
+            }
+            else {
+                if (opt_b.XAboveEq != null && opt_b.XBelowEq != null &&
+                    opt_b.YAboveEq != null && opt_b.YBelowEq != null &&
+                    opt_b.ZAboveEq != null && opt_b.ZBelowEq != null &&
+                    x > opt_b.XAboveEq && x < opt_b.XBelowEq &&
+                    y > opt_b.YAboveEq && y < opt_b.YBelowEq &&
+                    z > opt_b.ZAboveEq && z < opt_b.ZBelowEq)
+                    return false;
+            }
+
+            if (opt_b.IncludedBlockCount > 0 & !opt_b.IncludedBlocksContains(blockId))
+                return false;
+            if (opt_b.ExcludedBlockCount > 0 & opt_b.ExcludedBlocksContains(blockId))
+                return false;
+
+            if (opt_b.BlocksAboveCount > 0 && y < chunkYDim - 1) {
+                int neighborId = cache.Blocks.GetID(x & chunkXMask, (y + 1) & chunkYMask, z & chunkZMask);
+                if (!opt_b.BlocksAboveContains(neighborId))
+                    return false;
+            }
+
+            if (opt_b.BlocksBelowCount > 0 && y > 0) {
+                int neighborId = cache.Blocks.GetID(x & chunkXMask, (y - 1) & chunkYMask, z & chunkZMask);
+                if (!opt_b.BlocksBelowContains(neighborId))
+                    return false;
+            }
+
+            if (opt_b.ProbMatch != null) {
+                double c = rand.NextDouble();
+                if (c > opt_b.ProbMatch)
+                    return false;
+            }
+
+            return true;
+        }
     }
 }
