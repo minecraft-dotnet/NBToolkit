@@ -137,19 +137,19 @@ namespace NBToolkit
             }
 
             if (_blockFilter.XAboveEq != null) {
-                int cx = (int)_blockFilter.XAboveEq >> 5;
+                int cx = (int)_blockFilter.XAboveEq >> 4;
                 _chunkFilter.XAboveEq = Math.Max(_chunkFilter.XAboveEq ?? cx, cx);
             }
             if (_blockFilter.XBelowEq != null) {
-                int cx = (int)_blockFilter.XBelowEq >> 5;
+                int cx = (int)(_blockFilter.XBelowEq + 15) >> 4;
                 _chunkFilter.XBelowEq = Math.Min(_chunkFilter.XBelowEq ?? cx, cx);
             }
             if (_blockFilter.ZAboveEq != null) {
-                int cx = (int)_blockFilter.ZAboveEq >> 5;
+                int cx = (int)_blockFilter.ZAboveEq >> 4;
                 _chunkFilter.ZAboveEq = Math.Max(_chunkFilter.ZAboveEq ?? cx, cx);
             }
             if (_blockFilter.ZBelowEq != null) {
-                int cx = (int)_blockFilter.ZBelowEq >> 5;
+                int cx = (int)(_blockFilter.ZBelowEq + 15) >> 4;
                 _chunkFilter.ZBelowEq = Math.Min(_chunkFilter.ZBelowEq ?? cx, cx);
             }
         }

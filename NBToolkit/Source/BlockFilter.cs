@@ -138,7 +138,7 @@ namespace NBToolkit
                         try { _yAboveEq = Convert.ToInt32(v1); } catch (FormatException) { }
                         try { _yBelowEq = Convert.ToInt32(v2); } catch (FormatException) { } 
                     } },
-                { "bzr|BlockZRange=", "Include blocks with Z-chunk coord between {0:V1} and {1:V2}, inclusive.  V1 or V2 may be left blank.",
+                { "bzr|BlockZRange=", "Include blocks with Z-coord between {0:V1} and {1:V2}, inclusive.  V1 or V2 may be left blank.",
                     (v1, v2) => { 
                         try { _zAboveEq = Convert.ToInt32(v1); } catch (FormatException) { }
                         try { _zBelowEq = Convert.ToInt32(v2); } catch (FormatException) { } 
