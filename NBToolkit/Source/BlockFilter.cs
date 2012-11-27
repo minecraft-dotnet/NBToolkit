@@ -40,6 +40,15 @@ namespace NBToolkit
 
         bool BlocksAboveContains (int id);
         bool BlocksBelowContains (int id);
+
+        IEnumerable<int> IncludedData { get; } // MatchAny
+        IEnumerable<int> ExcludedData { get; } // MatchAny
+
+        int IncludedDataCount { get; }
+        int ExcludedDataCount { get; }
+
+        bool IncludedDataContains (int id);
+        bool ExcludedDataContains (int id);
     }
 
     public class BlockFilter : IOptions, IBlockFilter
@@ -60,6 +69,9 @@ namespace NBToolkit
 
         protected List<int> _blocksAboveEq = new List<int>();
         protected List<int> _blocksBelowEq = new List<int>();
+
+        protected List<int> _includedData = new List<int>();
+        protected List<int> _excludedData = new List<int>();
 
         protected OptionSet _options;
 
@@ -125,6 +137,26 @@ namespace NBToolkit
             get { return _prob; }
         }
 
+        public IEnumerable<int> IncludedData
+        {
+            get { return _includedData; }
+        }
+
+        public IEnumerable<int> ExcludedData
+        {
+            get { return _excludedData; }
+        }
+
+        public int IncludedDataCount
+        {
+            get { return _includedData.Count; }
+        }
+
+        public int ExcludedDataCount
+        {
+            get { return _excludedData.Count; }
+        }
+
         public BlockFilter ()
         {
             _options = new OptionSet() {
@@ -146,31 +178,51 @@ namespace NBToolkit
                 { "brv|BlockInvertXYZ", "Inverts the block selection created by --bxr, --byr and --bzr when all three options are used.",
                     v => _invertXYZ = true },
                 { "bi|BlockInclude=", "Match blocks of type {ID}.  This option is repeatable.",
-                    v => _includedBlocks.Add(Convert.ToInt32(v) % 256) },
+                    v => _includedBlocks.Add(Convert.ToInt32(v)) },
                 { "bir|BlockIncludeRange=", "Match blocks of type between {0:V1} and {1:V2}, inclusive.  This option is repeatable.",
                     (v1, v2) => {
-                        int i1 = Math.Max(0, Math.Min(255, Convert.ToInt32(v1)));
-                        int i2 = Math.Max(0, Math.Min(255, Convert.ToInt32(v2)));
+                        int i1 = Math.Max(0, Convert.ToInt32(v1));
+                        int i2 = Math.Max(0, Convert.ToInt32(v2));
                         for (int i = i1; i <= i2; i++) {
                             _includedBlocks.Add(i);
                         }
                     } },
                 { "bx|BlockExclude=", "Match all blocks except blocks of type {ID}.  This option is repeatable.",
-                    v => _excludedBlocks.Add(Convert.ToInt32(v) % 256) },
+                    v => _excludedBlocks.Add(Convert.ToInt32(v)) },
                 { "ber|BlockExcludeRange=", "Match all blocks except blocks of type between {0:V1} and {1:V2}, inclusive.  This option is repeatable.",
                     (v1, v2) => {
-                        int i1 = Math.Max(0, Math.Min(255, Convert.ToInt32(v1)));
-                        int i2 = Math.Max(0, Math.Min(255, Convert.ToInt32(v2)));
+                        int i1 = Math.Max(0, Convert.ToInt32(v1));
+                        int i2 = Math.Max(0, Convert.ToInt32(v2));
                         for (int i = i1; i <= i2; i++) {
                             _excludedBlocks.Add(i);
                         }
                     } },
                 { "nbya|BlockAboveEq=", "Update blocks that have block type {ID} as their top neighbor.  This option is repeatable.",
-                    v => _blocksAboveEq.Add(Convert.ToInt32(v) % 256) },
+                    v => _blocksAboveEq.Add(Convert.ToInt32(v)) },
                 { "nbyb|BlockBelowEq=", "Update blocks that have block type {ID} as their bottom neighbor.  This option is repeatable.",
-                    v => _blocksBelowEq.Add(Convert.ToInt32(v) % 256) },
+                    v => _blocksBelowEq.Add(Convert.ToInt32(v)) },
                 { "bp|BlockProbability=", "Selects a matching block with probability {VAL} (0.0-1.0)",
                     v => _prob = Convert.ToDouble(v) },
+                { "di|DataInclude=", "Match qualifying blocks with data value {VAL}.  This opion is repeatable.",
+                    var => _includedData.Add(Convert.ToInt32(var)) },
+                { "dir|DataIncludeRange=", "Match qualifying blocks with data value between {0:V1} and {1:V2}, inclusive.  This option is repeatable.",
+                    (v1, v2) => {
+                        int i1 = Math.Max(0, Convert.ToInt32(v1));
+                        int i2 = Math.Max(0, Convert.ToInt32(v2));
+                        for (int i = i1; i <= i2; i++) {
+                            _includedData.Add(i);
+                        }
+                    } },
+                { "dx|DataExclude=", "Match all qualifying blocks except blocks with data value {VAL}.  This opion is repeatable.",
+                    var => _excludedData.Add(Convert.ToInt32(var)) },
+                { "der|DataExcludeRange=", "Match all qualifying blocks except blocks with data value between {0:V1} and {1:V2}, inclusive.  This option is repeatable.",
+                    (v1, v2) => {
+                        int i1 = Math.Max(0, Convert.ToInt32(v1));
+                        int i2 = Math.Max(0, Convert.ToInt32(v2));
+                        for (int i = i1; i <= i2; i++) {
+                            _excludedData.Add(i);
+                        }
+                    } },
             };
         }
 
@@ -199,6 +251,16 @@ namespace NBToolkit
         public bool ExcludedBlocksContains (int id)
         {
             return _excludedBlocks.Contains(id);
+        }
+
+        public bool IncludedDataContains (int val)
+        {
+            return _includedData.Contains(val);
+        }
+
+        public bool ExcludedDataContains (int val)
+        {
+            return _excludedData.Contains(val);
         }
 
         public IEnumerable<int> BlocksAboveEq

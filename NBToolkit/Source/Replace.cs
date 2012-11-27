@@ -46,9 +46,9 @@ namespace NBToolkit
                 /*{ "b|before=", "Replace instances of block type {ID} with another block type.  This option is repeatable.",
                     v => _includedBlocks.Add(Convert.ToInt32(v) % 256) },*/
                 { "a|after=", "Replace the selected blocks with block type {ID}",
-                    v => OPT_AFTER = Convert.ToInt32(v) % 256 },
+                    v => OPT_AFTER = Convert.ToInt32(v) },
                 { "d|data=", "Set the new block's data value to {VAL} (0-15)",
-                    v => OPT_DATA = Convert.ToInt32(v) % 16 },
+                    v => OPT_DATA = Convert.ToInt32(v) },
                 /*{ "p|prob=", "Replace any matching block with probability {VAL} (0.0-1.0)",
                     v => { OPT_PROB = Convert.ToDouble(v, new CultureInfo("en-US")); 
                            OPT_PROB = Math.Max((double)OPT_PROB, 0.0); 
@@ -171,15 +171,16 @@ namespace NBToolkit
 
         private static Random rand = new Random();
 
-        private List<BlockKey>[] _sort = new List<BlockKey>[256];
+        //private List<BlockKey>[] _sort = new List<BlockKey>[4096];
+        private Dictionary<int, List<BlockKey>> _sort = new Dictionary<int, List<BlockKey>>();
 
         public Replace (ReplaceOptions o)
         {
             opt = o;
 
-            for (int i = 0; i < 256; i++) {
+            /*for (int i = 0; i < 4096; i++) {
                 _sort[i] = new List<BlockKey>();
-            }
+            }*/
         }
 
         public override void Run ()
@@ -272,26 +273,30 @@ namespace NBToolkit
                 for (int x = xmin; x <= xmax; x++) {
                     for (int z = zmin; z <= zmax; z++) {
                         int id = chunk.Blocks.GetID(x, y, z);
+                        if (!_sort.ContainsKey(id))
+                            _sort[id] = new List<BlockKey>();
+
                         _sort[id].Add(new BlockKey(x, y, z));
                     }
                 }
             }
 
             // Process bins
-            for (int i = 0; i < 256; i++) {
-                if (_sort[i].Count == 0) {
+            //for (int i = 0; i < maxBin; i++) {
+            foreach (var kv in _sort) {
+                if (kv.Value.Count == 0) {
                     continue;
                 }
 
-                if (opt_b.IncludedBlockCount > 0 & !opt_b.IncludedBlocksContains(i)) {
+                if (opt_b.IncludedBlockCount > 0 & !opt_b.IncludedBlocksContains(kv.Key)) {
                     continue;
                 }
 
-                if (opt_b.ExcludedBlockCount > 0 & opt_b.ExcludedBlocksContains(i)) {
+                if (opt_b.ExcludedBlockCount > 0 & opt_b.ExcludedBlocksContains(kv.Key)) {
                     continue;
                 }
 
-                foreach (BlockKey key in _sort[i]) {
+                foreach (BlockKey key in kv.Value) {
                     // Probability test
                     if (opt_b.ProbMatch != null) {
                         double c = rand.NextDouble();
@@ -311,12 +316,23 @@ namespace NBToolkit
                             continue;
                     }
 
+                    if (opt_b.IncludedDataCount > 0 || opt_b.ExcludedDataCount > 0) {
+                        int data = chunk.Blocks.GetData(key.x, key.y, key.z);
+                        if (opt_b.IncludedDataCount > 0 && !opt_b.IncludedDataContains(data)) {
+                            continue;
+                        }
+
+                        if (opt_b.ExcludedDataCount > 0 && opt_b.ExcludedDataContains(data)) {
+                            continue;
+                        }
+                    }
+
                     chunk.Blocks.SetID(key.x, key.y, key.z, (int)opt.OPT_AFTER);
 
                     if (opt.OPT_VV) {
                         int gx = chunk.X * xdim + key.x;
                         int gz = chunk.Z * zdim + key.z;
-                        Console.WriteLine("Replaced block {0} at {1},{2},{3}", i, gx, key.y, gz);
+                        Console.WriteLine("Replaced block {0} at {1},{2},{3}", kv.Key, gx, key.y, gz);
                     }
 
                     if (opt.OPT_DATA != null) {
@@ -326,9 +342,7 @@ namespace NBToolkit
             }
 
             // Reset bins
-            for (int i = 0; i < 256; i++) {
-                _sort[i].Clear();
-            }
+            _sort.Clear();
 
             // Process Chunk
             /*for (int y = ymin; y <= ymax; y++) {

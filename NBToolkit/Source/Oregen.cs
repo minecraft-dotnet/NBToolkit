@@ -379,6 +379,17 @@ namespace NBToolkit
                     return false;
             }
 
+            if (opt_b.IncludedDataCount > 0 || opt_b.ExcludedDataCount > 0) {
+                int data = cache.Blocks.GetData(x & chunkXMask, y & chunkYMask, z & chunkZMask);
+                if (opt_b.IncludedDataCount > 0 && !opt_b.IncludedDataContains(data)) {
+                    return false;
+                }
+
+                if (opt_b.ExcludedDataCount > 0 && opt_b.ExcludedDataContains(data)) {
+                    return false;
+                }
+            }
+
             return true;
         }
     }
