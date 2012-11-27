@@ -5,6 +5,7 @@ using System.Globalization;
 using NDesk.Options;
 using Substrate;
 using Substrate.Core;
+using System.IO;
 
 namespace NBToolkit
 {
@@ -185,9 +186,26 @@ namespace NBToolkit
 
         public override void Run ()
         {
-            NbtWorld world = NbtWorld.Open(opt.OPT_WORLD);
-            IChunkManager cm = world.GetChunkManager(opt.OPT_DIM);
-            FilteredChunkManager fcm = new FilteredChunkManager(cm, opt.GetChunkFilter());
+            if (!Directory.Exists(opt.OPT_WORLD) && !File.Exists(opt.OPT_WORLD)) {
+                Console.WriteLine("Error: Could not locate path: " + opt.OPT_WORLD);
+                return;
+            }
+
+            NbtWorld world = null;
+            IChunkManager cm = null;
+            FilteredChunkManager fcm = null;
+
+            try {
+                world = NbtWorld.Open(opt.OPT_WORLD);
+                cm = world.GetChunkManager(opt.OPT_DIM);
+                fcm = new FilteredChunkManager(cm, opt.GetChunkFilter());
+            }
+            catch (Exception e) {
+                Console.WriteLine("Error: Failed to open world: " + opt.OPT_WORLD);
+                Console.WriteLine("Exception: " + e.Message);
+                Console.WriteLine(e.StackTrace);
+                return;
+            }
 
             int affectedChunks = 0;
             foreach (ChunkRef chunk in fcm) {
