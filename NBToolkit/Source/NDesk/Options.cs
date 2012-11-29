@@ -737,7 +737,7 @@ namespace NDesk.Options {
 					Unprocessed (unprocessed, def, c, argument);
 					continue;
 				}
-				if (!Parse (argument.ToLower(), c))
+				if (!Parse (argument, c))
 					Unprocessed (unprocessed, def, c, argument);
 			}
 			if (c.Option != null)
