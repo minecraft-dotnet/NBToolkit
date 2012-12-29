@@ -373,6 +373,54 @@ namespace NBToolkit
                     return false;
             }
 
+            if (opt_b.BlocksSideCount > 0) {
+                while (true) {
+                    AlphaBlockRef block1 = GetBlockRefUnchecked(x - 1, y, z);
+                    if (block1.IsValid && opt_b.BlocksSideContains(block1.ID))
+                        break;
+                    AlphaBlockRef block2 = GetBlockRefUnchecked(x + 1, y, z);
+                    if (block2.IsValid && opt_b.BlocksSideContains(block2.ID))
+                        break;
+                    AlphaBlockRef block3 = GetBlockRefUnchecked(x, y, z - 1);
+                    if (block3.IsValid && opt_b.BlocksSideContains(block3.ID))
+                        break;
+                    AlphaBlockRef block4 = GetBlockRefUnchecked(x, y, z + 1);
+                    if (block4.IsValid && opt_b.BlocksSideContains(block4.ID))
+                        break;
+                    return false;
+                }
+            }
+
+            if (opt_b.BlocksNAboveCount > 0 && y < chunkYDim - 1) {
+                int neighborId = cache.Blocks.GetID(x & chunkXMask, (y + 1) & chunkYMask, z & chunkZMask);
+                if (opt_b.BlocksNAboveContains(neighborId))
+                    return false;
+            }
+
+            if (opt_b.BlocksNBelowCount > 0 && y > 0) {
+                int neighborId = cache.Blocks.GetID(x & chunkXMask, (y - 1) & chunkYMask, z & chunkZMask);
+                if (opt_b.BlocksNBelowContains(neighborId))
+                    return false;
+            }
+
+            if (opt_b.BlocksNSideCount > 0) {
+                while (true) {
+                    AlphaBlockRef block1 = GetBlockRefUnchecked(x - 1, y, z);
+                    if (block1.IsValid && opt_b.BlocksNSideContains(block1.ID))
+                        return false;
+                    AlphaBlockRef block2 = GetBlockRefUnchecked(x + 1, y, z);
+                    if (block2.IsValid && opt_b.BlocksNSideContains(block2.ID))
+                        return false;
+                    AlphaBlockRef block3 = GetBlockRefUnchecked(x, y, z - 1);
+                    if (block3.IsValid && opt_b.BlocksNSideContains(block3.ID))
+                        return false;
+                    AlphaBlockRef block4 = GetBlockRefUnchecked(x, y, z + 1);
+                    if (block4.IsValid && opt_b.BlocksNSideContains(block4.ID))
+                        return false;
+                    break;
+                }
+            }
+
             if (opt_b.ProbMatch != null) {
                 double c = rand.NextDouble();
                 if (c > opt_b.ProbMatch)
@@ -391,6 +439,16 @@ namespace NBToolkit
             }
 
             return true;
+        }
+
+        private AlphaBlockRef GetBlockRefUnchecked (int x, int y, int z)
+        {
+            ChunkRef cache = GetChunk(x, y, z);
+            if (cache == null) {
+                return new AlphaBlockRef();
+            }
+
+            return cache.Blocks.GetBlockRef(x & chunkXMask, y & chunkYMask, z & chunkZMask);
         }
     }
 }

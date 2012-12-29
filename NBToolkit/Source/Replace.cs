@@ -334,6 +334,51 @@ namespace NBToolkit
                             continue;
                     }
 
+                    if (opt_b.BlocksSideCount > 0) {
+                        bool validNeighbor = false;
+                        AlphaBlockRef block1 = GetNeighborBlock(chunk, key.x - 1, key.y, key.z);
+                        if (block1.IsValid && opt_b.BlocksSideContains(block1.ID) && !validNeighbor)
+                            validNeighbor = true;
+                        AlphaBlockRef block2 = GetNeighborBlock(chunk, key.x + 1, key.y, key.z);
+                        if (block2.IsValid && opt_b.BlocksSideContains(block2.ID) && !validNeighbor)
+                            validNeighbor = true;
+                        AlphaBlockRef block3 = GetNeighborBlock(chunk, key.x, key.y, key.z - 1);
+                        if (block3.IsValid && opt_b.BlocksSideContains(block3.ID) && !validNeighbor)
+                            validNeighbor = true;
+                        AlphaBlockRef block4 = GetNeighborBlock(chunk, key.x, key.y, key.z + 1);
+                        if (block4.IsValid && opt_b.BlocksSideContains(block4.ID) && !validNeighbor)
+                            validNeighbor = true;
+                        if (!validNeighbor)
+                            continue;
+                    }
+
+                    if (opt_b.BlocksNAboveCount > 0 && key.y < ydim - 1) {
+                        int neighborId = chunk.Blocks.GetID(key.x, key.y + 1, key.z);
+                        if (opt_b.BlocksNAboveContains(neighborId))
+                            continue;
+                    }
+
+                    if (opt_b.BlocksNBelowCount > 0 && key.y > 0) {
+                        int neighborId = chunk.Blocks.GetID(key.x, key.y - 1, key.z);
+                        if (opt_b.BlocksNBelowContains(neighborId))
+                            continue;
+                    }
+
+                    if (opt_b.BlocksNSideCount > 0) {
+                        AlphaBlockRef block1 = GetNeighborBlock(chunk, key.x - 1, key.y, key.z);
+                        if (block1.IsValid && opt_b.BlocksNSideContains(block1.ID))
+                            continue;
+                        AlphaBlockRef block2 = GetNeighborBlock(chunk, key.x + 1, key.y, key.z);
+                        if (block2.IsValid && opt_b.BlocksNSideContains(block2.ID))
+                            continue;
+                        AlphaBlockRef block3 = GetNeighborBlock(chunk, key.x, key.y, key.z - 1);
+                        if (block3.IsValid && opt_b.BlocksNSideContains(block3.ID))
+                            continue;
+                        AlphaBlockRef block4 = GetNeighborBlock(chunk, key.x, key.y, key.z + 1);
+                        if (block4.IsValid && opt_b.BlocksNSideContains(block4.ID))
+                            continue;
+                    }
+
                     if (opt_b.IncludedDataCount > 0 || opt_b.ExcludedDataCount > 0) {
                         int data = chunk.Blocks.GetData(key.x, key.y, key.z);
                         if (opt_b.IncludedDataCount > 0 && !opt_b.IncludedDataContains(data)) {
@@ -426,6 +471,34 @@ namespace NBToolkit
                     }
                 }
             }*/
+        }
+
+        private AlphaBlockRef GetNeighborBlock (ChunkRef chunk, int x, int y, int z)
+        {
+            if (chunk == null)
+                return new AlphaBlockRef();
+
+            ChunkRef target = chunk;
+            if (x < 0) {
+                target = chunk.GetNorthNeighbor();
+                x += chunk.Blocks.XDim;
+            }
+            else if (x >= chunk.Blocks.XDim) {
+                target = chunk.GetSouthNeighbor();
+                x -= chunk.Blocks.XDim;
+            }
+            else if (z < 0) {
+                target = chunk.GetEastNeighbor();
+                z += chunk.Blocks.ZDim;
+            }
+            else if (z >= chunk.Blocks.ZDim) {
+                target = chunk.GetWestNeighbor();
+                z -= chunk.Blocks.ZDim;
+            }
+            else
+                return target.Blocks.GetBlockRef(x, y, z);
+
+            return GetNeighborBlock(target, x, y, z);
         }
     }
 }

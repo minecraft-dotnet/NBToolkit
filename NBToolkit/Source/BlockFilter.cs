@@ -34,12 +34,27 @@ namespace NBToolkit
 
         IEnumerable<int> BlocksAboveEq { get; } // MatchAny
         IEnumerable<int> BlocksBelowEq { get; } // MatchAny
+        IEnumerable<int> BlocksSideEq { get; } // MatchAny
+
+        IEnumerable<int> BlocksAboveNeq { get; } // MatchAny
+        IEnumerable<int> BlocksBelowNeq { get; } // MatchAny
+        IEnumerable<int> BlocksSideNeq { get; } // MatchAny
 
         int BlocksAboveCount { get; }
         int BlocksBelowCount { get; }
+        int BlocksSideCount { get; }
+
+        int BlocksNAboveCount { get; }
+        int BlocksNBelowCount { get; }
+        int BlocksNSideCount { get; }
 
         bool BlocksAboveContains (int id);
         bool BlocksBelowContains (int id);
+        bool BlocksSideContains (int id);
+
+        bool BlocksNAboveContains (int id);
+        bool BlocksNBelowContains (int id);
+        bool BlocksNSideContains (int id);
 
         IEnumerable<int> IncludedData { get; } // MatchAny
         IEnumerable<int> ExcludedData { get; } // MatchAny
@@ -69,6 +84,11 @@ namespace NBToolkit
 
         protected List<int> _blocksAboveEq = new List<int>();
         protected List<int> _blocksBelowEq = new List<int>();
+        protected List<int> _blocksSideEq = new List<int>();
+
+        protected List<int> _blocksAboveNeq = new List<int>();
+        protected List<int> _blocksBelowNeq = new List<int>();
+        protected List<int> _blocksSideNeq = new List<int>();
 
         protected List<int> _includedData = new List<int>();
         protected List<int> _excludedData = new List<int>();
@@ -197,10 +217,30 @@ namespace NBToolkit
                             _excludedBlocks.Add(i);
                         }
                     } },
+                { "nb|BlockAroundEq=", "Update blocks that have block type {ID} as any neighbor.  This option is repeatable.",
+                    v => {
+                        _blocksAboveEq.Add(Convert.ToInt32(v));
+                        _blocksBelowEq.Add(Convert.ToInt32(v));
+                        _blocksSideEq.Add(Convert.ToInt32(v));
+                    } },
                 { "nbya|BlockAboveEq=", "Update blocks that have block type {ID} as their top neighbor.  This option is repeatable.",
                     v => _blocksAboveEq.Add(Convert.ToInt32(v)) },
                 { "nbyb|BlockBelowEq=", "Update blocks that have block type {ID} as their bottom neighbor.  This option is repeatable.",
                     v => _blocksBelowEq.Add(Convert.ToInt32(v)) },
+                { "nbs|BlockSideEq=", "Update blocks that have block type {ID} as one or more side neighbors.  This option is repeatable.",
+                    v => _blocksSideEq.Add(Convert.ToInt32(v)) },
+                { "nbx|BlockAroundNeq=", "Update blocks that don't have block type {ID} as any neighbor.  This option is repeatable.",
+                    v => {
+                        _blocksAboveNeq.Add(Convert.ToInt32(v));
+                        _blocksBelowNeq.Add(Convert.ToInt32(v));
+                        _blocksSideNeq.Add(Convert.ToInt32(v));
+                    } },
+                { "nbyax|BlockAboveNeq=", "Update blocks that don't have block type {ID} as their top neighbor.  This option is repeatable.",
+                    v => _blocksAboveNeq.Add(Convert.ToInt32(v)) },
+                { "nbybx|BlockBelowNeq=", "Update blocks that don't have block type {ID} as their bottom neighbor.  This option is repeatable.",
+                    v => _blocksBelowNeq.Add(Convert.ToInt32(v)) },
+                { "nbsx|BlockSideNeq=", "Update blocks that don't have block type {ID} as one or more side neighbors.  This option is repeatable.",
+                    v => _blocksSideNeq.Add(Convert.ToInt32(v)) },
                 { "bp|BlockProbability=", "Selects a matching block with probability {VAL} (0.0-1.0)",
                     v => _prob = Convert.ToDouble(v) },
                 { "di|DataInclude=", "Match qualifying blocks with data value {VAL}.  This opion is repeatable.",
@@ -273,6 +313,26 @@ namespace NBToolkit
             get { return _blocksBelowEq; }
         }
 
+        public IEnumerable<int> BlocksSideEq
+        {
+            get { return _blocksSideEq; }
+        }
+
+        public IEnumerable<int> BlocksAboveNeq
+        {
+            get { return _blocksAboveNeq; }
+        }
+
+        public IEnumerable<int> BlocksBelowNeq
+        {
+            get { return _blocksBelowNeq; }
+        }
+
+        public IEnumerable<int> BlocksSideNeq
+        {
+            get { return _blocksSideNeq; }
+        }
+
         public int BlocksAboveCount
         {
             get { return _blocksAboveEq.Count; }
@@ -283,6 +343,26 @@ namespace NBToolkit
             get { return _blocksBelowEq.Count; }
         }
 
+        public int BlocksSideCount
+        {
+            get { return _blocksSideEq.Count; }
+        }
+
+        public int BlocksNAboveCount
+        {
+            get { return _blocksAboveNeq.Count; }
+        }
+
+        public int BlocksNBelowCount
+        {
+            get { return _blocksBelowNeq.Count; }
+        }
+
+        public int BlocksNSideCount
+        {
+            get { return _blocksSideNeq.Count; }
+        }
+
         public bool BlocksAboveContains (int id)
         {
             return _blocksAboveEq.Contains(id);
@@ -291,6 +371,26 @@ namespace NBToolkit
         public bool BlocksBelowContains (int id)
         {
             return _blocksBelowEq.Contains(id);
+        }
+
+        public bool BlocksSideContains (int id)
+        {
+            return _blocksSideEq.Contains(id);
+        }
+
+        public bool BlocksNAboveContains (int id)
+        {
+            return _blocksAboveNeq.Contains(id);
+        }
+
+        public bool BlocksNBelowContains (int id)
+        {
+            return _blocksBelowNeq.Contains(id);
+        }
+
+        public bool BlocksNSideContains (int id)
+        {
+            return _blocksSideNeq.Contains(id);
         }
     }
 }
