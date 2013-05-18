@@ -47,6 +47,7 @@ namespace NBToolkit
             new OreType() { id = 73, name = "Redstone", rounds = 8, min = 0, max = 15, size = 7 },
             new OreType() { id = 56, name = "Diamond", rounds = 1, min = 0, max = 15, size = 7 },
             new OreType() { id = 21, name = "Lapis", rounds = 1, min = 0, max = 31, size = 7 },
+            new OreType() { id = 153, name = "Quartz", rounds = 16, min = 10, max = 117, size = 13 },
         };
 
         public OregenOptions ()
