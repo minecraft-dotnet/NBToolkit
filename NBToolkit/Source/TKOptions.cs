@@ -17,7 +17,7 @@ namespace NBToolkit
         private OptionSet commonOpt = null;
 
         public string OPT_WORLD = "";
-        public int OPT_DIM = 0;
+        public string OPT_DIM = "";
 
         // Verbosity
         public bool OPT_V = false;
@@ -31,12 +31,14 @@ namespace NBToolkit
             {
                 { "w|world=", "World directory",
                     v => OPT_WORLD = v },
+                { "dim=", "Optional dimension directory within the world directory",
+                    v => OPT_DIM = v },
                 { "h|help", "Print this help message",
                     v => OPT_HELP = true },
                 { "alpha", "Specify that the world is stored as individual chunk files",
                     v => OPT_ALPHA = true },
                 { "nether", "Update the Nether instead of the main region",
-                    v => OPT_DIM = -1 },
+                    v => OPT_DIM = "DIM-1" },
                 { "v", "Verbose output",
                     v => OPT_V = true },
                 { "vv", "Very verbose output",
