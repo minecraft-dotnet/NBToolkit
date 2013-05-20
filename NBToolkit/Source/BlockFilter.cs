@@ -24,6 +24,9 @@ namespace NBToolkit
         IEnumerable<int> IncludedBlocks { get; } // MatchAny
         IEnumerable<int> ExcludedBlocks { get; } // MatchAny
 
+        IEnumerable<KeyValuePair<int, int>> IncludedBlockRanges { get; } // MatchAny
+        IEnumerable<KeyValuePair<int, int>> ExcludedBlockRanges { get; } // MatchAny
+
         int IncludedBlockCount { get; }
         int ExcludedBlockCount { get; }
 
@@ -79,6 +82,9 @@ namespace NBToolkit
 
         protected List<int> _includedBlocks = new List<int>();
         protected List<int> _excludedBlocks = new List<int>();
+
+        protected List<KeyValuePair<int, int>> _includedBlocksRange = new List<KeyValuePair<int, int>>();
+        protected List<KeyValuePair<int, int>> _excludedBlocksRange = new List<KeyValuePair<int, int>>();
 
         protected double? _prob = null;
 
@@ -142,14 +148,24 @@ namespace NBToolkit
             get { return _excludedBlocks; }
         }
 
+        public IEnumerable<KeyValuePair<int, int>> IncludedBlockRanges
+        {
+            get { return _includedBlocksRange; }
+        }
+
+        public IEnumerable<KeyValuePair<int, int>> ExcludedBlockRanges
+        {
+            get { return _excludedBlocksRange; }
+        }
+
         public int IncludedBlockCount
         {
-            get { return _includedBlocks.Count; }
+            get { return _includedBlocks.Count + _includedBlocksRange.Count; }
         }
 
         public int ExcludedBlockCount
         {
-            get { return _excludedBlocks.Count; }
+            get { return _excludedBlocks.Count + _excludedBlocksRange.Count; }
         }
 
         public double? ProbMatch
@@ -203,9 +219,10 @@ namespace NBToolkit
                     (v1, v2) => {
                         int i1 = Math.Max(0, Convert.ToInt32(v1));
                         int i2 = Math.Max(0, Convert.ToInt32(v2));
-                        for (int i = i1; i <= i2; i++) {
-                            _includedBlocks.Add(i);
-                        }
+                        _includedBlocksRange.Add(new KeyValuePair<int, int>(Math.Min(i1, i2), Math.Max(i1, i2)));
+                        //for (int i = i1; i <= i2; i++) {
+                        //    _includedBlocks.Add(i);
+                        //}
                     } },
                 { "bx|BlockExclude=", "Match all blocks except blocks of type {ID}.  This option is repeatable.",
                     v => _excludedBlocks.Add(Convert.ToInt32(v)) },
@@ -213,9 +230,10 @@ namespace NBToolkit
                     (v1, v2) => {
                         int i1 = Math.Max(0, Convert.ToInt32(v1));
                         int i2 = Math.Max(0, Convert.ToInt32(v2));
-                        for (int i = i1; i <= i2; i++) {
-                            _excludedBlocks.Add(i);
-                        }
+                        _excludedBlocksRange.Add(new KeyValuePair<int, int>(Math.Min(i1, i2), Math.Max(i1, i2)));
+                        //for (int i = i1; i <= i2; i++) {
+                        //    _excludedBlocks.Add(i);
+                        //}
                     } },
                 { "nb|BlockAroundEq=", "Update blocks that have block type {ID} as any neighbor.  This option is repeatable.",
                     v => {

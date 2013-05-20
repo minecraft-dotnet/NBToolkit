@@ -357,10 +357,26 @@ namespace NBToolkit
                     return false;
             }
 
-            if (opt_b.IncludedBlockCount > 0 & !opt_b.IncludedBlocksContains(blockId))
-                return false;
-            if (opt_b.ExcludedBlockCount > 0 & opt_b.ExcludedBlocksContains(blockId))
-                return false;
+            if (opt_b.IncludedBlockCount > 0) {
+                if (!opt_b.IncludedBlocksContains(blockId)) {
+                    bool found = false;
+                    foreach (var range in opt_b.IncludedBlockRanges) {
+                        if (blockId >= range.Key && blockId <= range.Value)
+                            found = true;
+                    }
+                    if (!found)
+                        return false;
+                }
+            }
+
+            if (opt_b.ExcludedBlockCount > 0) {
+                if (opt_b.ExcludedBlocksContains(blockId))
+                    return false;
+                foreach (var range in opt_b.ExcludedBlockRanges) {
+                    if (blockId >= range.Key && blockId <= range.Value)
+                        return false;
+                }
+            }
 
             if (opt_b.BlocksAboveCount > 0 && y < chunkYDim - 1) {
                 int neighborId = cache.Blocks.GetID(x & chunkXMask, (y + 1) & chunkYMask, z & chunkZMask);

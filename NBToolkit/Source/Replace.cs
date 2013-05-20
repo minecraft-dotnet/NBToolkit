@@ -44,47 +44,10 @@ namespace NBToolkit
         {
             _filterOpt = new OptionSet()
             {
-                /*{ "b|before=", "Replace instances of block type {ID} with another block type.  This option is repeatable.",
-                    v => _includedBlocks.Add(Convert.ToInt32(v) % 256) },*/
                 { "a|after=", "Replace the selected blocks with block type {ID}",
                     v => OPT_AFTER = Convert.ToInt32(v) },
                 { "d|data=", "Set the new block's data value to {VAL} (0-15)",
                     v => OPT_DATA = Convert.ToInt32(v) },
-                /*{ "p|prob=", "Replace any matching block with probability {VAL} (0.0-1.0)",
-                    v => { OPT_PROB = Convert.ToDouble(v, new CultureInfo("en-US")); 
-                           OPT_PROB = Math.Max((double)OPT_PROB, 0.0); 
-                           OPT_PROB = Math.Min((double)OPT_PROB, 1.0); } },
-                { "bxr|BlockXRange=", "Update blocks with X-coord between {0:V1} and {1:V2}, inclusive.  V1 or V2 may be left blank.",
-                    (v1, v2) => { 
-                        try { BL_X_GE = Convert.ToInt32(v1); } catch (FormatException) { }
-                        try { BL_X_LE = Convert.ToInt32(v2); } catch (FormatException) { } 
-                    } },
-                { "byr|BlockYRange=", "Update blocks with Y-coord between {0:V1} and {1:V2}, inclusive.  V1 or V2 may be left blank",
-                    (v1, v2) => { 
-                        try { BL_Y_GE = Convert.ToInt32(v1); } catch (FormatException) { }
-                        try { BL_Y_LE = Convert.ToInt32(v2); } catch (FormatException) { } 
-                    } },
-                { "bzr|BlockZRange=", "Update blocks with Z-coord between {0:V1} and {1:V2}, inclusive.  V1 or V2 may be left blank",
-                    (v1, v2) => { 
-                        try { BL_Z_GE = Convert.ToInt32(v1); } catch (FormatException) { }
-                        try { BL_Z_LE = Convert.ToInt32(v2); } catch (FormatException) { } 
-                    } },*/
-                /*{ "nb=", "Update blocks that have block type {ID} as any neighbor",
-                    v => OPT_NEIGHBOR = Convert.ToInt32(v) % 256 },
-                { "nbs=", "Update blocks that have block type {ID} as any x/z neighbor",
-                    v => OPT_NEIGHBOR_SIDE = Convert.ToInt32(v) % 256 },
-                { "nbxa=", "Update blocks that have block type {ID} as their south neighbor",
-                    v => OPT_NEIGHBOR_S = Convert.ToInt32(v) % 256 },
-                { "nbxb=", "Update blocks that have block type {ID} as their north neighbor",
-                    v => OPT_NEIGHBOR_N = Convert.ToInt32(v) % 256 },*/
-                /*{ "nbya|BlockAboveEq=", "Update blocks that have block type {ID} as their top neighbor.  This option is repeatable.",
-                    v => BlocksAboveEq.Add(Convert.ToInt32(v) % 256) },
-                { "nbyb|BlockBelowEq=", "Update blocks that have block type {ID} as their bottom neighbor.  This option is repeatable.",
-                    v => BlocksBelowEq.Add(Convert.ToInt32(v) % 256) },*/
-                /*{ "nbza=", "Update blocks that have block type {ID} as their west neighbor",
-                    v => OPT_NEIGHBOR_W = Convert.ToInt32(v) % 256 },
-                { "nbzb=", "Update blocks that have block type {ID} as their east neighbor",
-                    v => OPT_NEIGHBOR_E = Convert.ToInt32(v) % 256 },*/
             };
 
             _chunkFilter = new ChunkFilter();
@@ -304,6 +267,27 @@ namespace NBToolkit
             foreach (var kv in _sort) {
                 if (kv.Value.Count == 0) {
                     continue;
+                }
+
+                if (opt_b.IncludedBlockCount > 0) {
+                    if (!opt_b.IncludedBlocksContains(kv.Key)) {
+                        bool found = false;
+                        foreach (var range in opt_b.IncludedBlockRanges) {
+                            if (kv.Key >= range.Key && kv.Key <= range.Value)
+                                found = true;
+                        }
+                        if (!found)
+                            continue;
+                    }
+                }
+
+                if (opt_b.ExcludedBlockCount > 0) {
+                    if (opt_b.ExcludedBlocksContains(kv.Key))
+                        continue;
+                    foreach (var range in opt_b.ExcludedBlockRanges) {
+                        if (kv.Key >= range.Key && kv.Key <= range.Value)
+                            continue;
+                    }
                 }
 
                 if (opt_b.IncludedBlockCount > 0 & !opt_b.IncludedBlocksContains(kv.Key)) {
